@@ -1,0 +1,284 @@
+1. Python Examples
+Example 1: SQL Injection Vulnerability
+def get_user_by_id(user_id):
+    """Vulnerable to SQL injection"""
+    import sqlite3
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    
+    # VULNERABLE: Direct string concatenation
+    query = "SELECT * FROM users WHERE id = " + str(user_id)
+    cursor.execute(query)
+    
+    result = cursor.fetchone()
+    conn.close()
+    return result
+Example 2: Hardcoded Credentials
+class DatabaseConfig:
+    DB_HOST = "mongodb.com"
+    DB_USER = "admin"
+    DB_PASSWORD = "SuperSecret123!"
+    API_KEY = "sk_live_51234567890abcdef"
+    
+    def connect(self):
+        import pymongo
+        client = pymongo.MongoClient(
+            f"mongodb+srv://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}"
+        )
+        return client
+Example 3: Command Injection
+def process_image(filename):
+    """Vulnerable to command injection"""
+    import os
+    
+    user_input = filename
+    # VULNERABLE: Command concatenation
+    command = f"convert {user_input} output.png"
+    os.system(command)
+    
+    return "Image processed"
+Example 4: Insecure Deserialization
+import pickle
+import json
+
+def deserialize_user_data(data):
+    """Dangerous deserialization"""
+    # VULNERABLE: Using pickle with untrusted data
+    user_object = pickle.loads(data)
+    return user_object
+
+def process_json(user_input):
+    """Less vulnerable but could have issues"""
+    eval(user_input)  # VULNERABLE: Using eval()
+Example 5: Missing Input Validation
+def create_user(username, email, age):
+    """No input validation"""
+    user_data = {
+        "username": username,
+        "email": email,
+        "age": age
+    }
+    
+    # Save directly without validation
+    save_to_database(user_data)
+    return user_data
+
+def divide_numbers(a, b):
+    """No division by zero check"""
+    return a / b
+2. JavaScript Examples
+Example 6: XSS Vulnerability
+function displayUserComment(comment) {
+    // VULNERABLE: Direct DOM manipulation with user input
+    const commentDiv = document.getElementById('comments');
+    commentDiv.innerHTML = `<p>${comment}</p>`;
+}
+
+function renderHTML(userInput) {
+    // VULNERABLE: Setting HTML without sanitization
+    document.body.innerHTML += `
+        <div class="message">
+            ${userInput}
+        </div>
+    `;
+}
+Example 7: Insecure API Call
+async function fetchUserData(userId) {
+    // VULNERABLE: Hardcoded API endpoint and key
+    const API_KEY = "sk_test_abcd1234efgh5678ijkl";
+    const ADMIN_URL = "https://api.example.com/admin";
+    
+    const response = await fetch(`${ADMIN_URL}/users/${userId}?key=${API_KEY}`);
+    const data = await response.json();
+    
+    // VULNERABLE: No error handling, credentials in code
+    localStorage.setItem('userData', JSON.stringify(data));
+    return data;
+}
+Example 8: Unvalidated Redirect
+function redirectUser(redirectUrl) {
+    // VULNERABLE: No URL validation
+    window.location.href = redirectUrl;
+}
+
+function handleLogin(userInput) {
+    const redirectTo = userInput;
+    // Could redirect to malicious site
+    window.open(redirectTo);
+}
+Example 9: Complex with Poor Practices
+class UserManager {
+    constructor() {
+        this.users = [];
+        this.isAdmin = true;
+    }
+    
+    addUser(userData) {
+        // VULNERABLE: No input sanitization
+        this.users.push(userData);
+    }
+    
+    deleteUser(id) {
+        // VULNERABLE: No permission checks
+        if (this.isAdmin) {
+            this.users = this.users.filter(u => u.id !== id);
+        }
+    }
+    
+    exportData() {
+        // VULNERABLE: No access control
+        return JSON.stringify(this.users);
+    }
+    
+    runQuery(query) {
+        // VULNERABLE: eval usage
+        return eval(query);
+    }
+}
+3. Java Examples
+Example 10: SQL Injection in Java
+import java.sql.*;
+
+public class UserRepository {
+    
+    public User findUserById(String userId) throws SQLException {
+        String url = "jdbc:mysql://localhost:3306/users";
+        Connection conn = DriverManager.getConnection(url, "root", "password");
+        
+        // VULNERABLE: String concatenation in SQL
+        String query = "SELECT * FROM users WHERE id = " + userId;
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        
+        User user = new User();
+        if (rs.next()) {
+            user.setId(rs.getInt("id"));
+            user.setName(rs.getString("name"));
+        }
+        
+        return user;
+    }
+    
+    public boolean authenticateUser(String username, String password) {
+        // VULNERABLE: No password hashing
+        String storedPassword = "plain_text_password";
+        return password.equals(storedPassword);
+    }
+}
+Example 11: Security Misconfiguration
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class LoginServlet extends HttpServlet {
+    
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        // VULNERABLE: No CSRF token validation
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        
+        // VULNERABLE: Session fixation risk
+        HttpSession session = request.getSession(true);
+        session.setAttribute("user", username);
+        
+        // VULNERABLE: No secure cookie flags
+        Cookie authCookie = new Cookie("auth", username);
+        response.addCookie(authCookie);
+    }
+}
+4. TypeScript Examples
+Example 12: Unsafe Type Assertions
+interface User {
+    id: number;
+    name: string;
+    role: 'user' | 'admin';
+}
+
+function processUserData(data: unknown): User {
+    // VULNERABLE: Unsafe type assertion
+    const user = data as User;
+    return user;
+}
+
+function apiCall(endpoint: string): Promise<any> {
+    // VULNERABLE: Using 'any' type defeats type safety
+    return fetch(endpoint).then(r => r.json());
+}
+
+async function loadUserSettings(id: number) {
+    const data = await apiCall(`/api/users/${id}`);
+    // No validation that data has expected shape
+    return data.settings.private;
+}
+5. Mixed Code Quality Issues
+Example 13: Poor Code Quality
+def calc(x, y, op):
+    if op == '+': return x + y
+    elif op == '-': return x - y
+    elif op == '*': return x * y
+    elif op == '/': 
+        if y == 0: return None
+        return x / y
+    elif op == '**': return x ** y
+    elif op == '%': return x % y
+    else: return None
+
+def proc(d):
+    r = []
+    for i in range(len(d)):
+        for j in range(len(d)):
+            if d[i] > d[j]:
+                r.append(d[i])
+    return r
+
+class A:
+    def __init__(self, a, b, c, d, e, f, g):
+        self.a = a
+        self.b = b
+        self.c = c
+        # ... repeated assignments
+    
+    def m1(self): return self.a + self.b
+    def m2(self): return self.c - self.d
+    def m3(self): return self.e * self.f
+Example 14: Resource Management Issues
+def read_file_bad(filename):
+    """Resource leak - file never closed"""
+    f = open(filename, 'r')
+    data = f.read()
+    return data  # File handle left open!
+
+def process_multiple_files(files):
+    """No exception handling"""
+    results = []
+    for file in files:
+        f = open(file)
+        results.append(f.read())
+        f.close()  # If exception occurs, this never runs
+    return results
+
+def database_query(query):
+    """Connection not closed on error"""
+    import sqlite3
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+    result = cursor.execute(query).fetchall()
+    conn.close()
+    return result  # Exception before close() leaves connection open
+How to Use These Examples:
+Open CodeMentor AI at http://localhost:5173
+Select the language from the dropdown (Python, JavaScript, Java, etc.)
+Copy and paste one of the examples above into the code editor
+Click "Analyze" to see the review results
+Check the vulnerabilities panel to see detected issues
+Review the score to see the overall code quality assessment
+Each example is designed to showcase different vulnerability types and code quality issues that the Groq API will detect and explain.
+Update Todos
+
+Create comprehensive test code examples for CodeMentor AI
+You now have 14 diverse test examples across Python, JavaScript, Java, and TypeScript that cover:
+Security vulnerabilities: SQL injection, command injection, XSS, hardcoded credentials
+Authentication issues: Plaintext passwords, missing CSRF tokens
+Resource management: File handles, database connections
+Code quality: High complexity, poor naming, code duplication
+Type safety: Unsafe assertions, missing validation
+Try each one in your CodeMentor AI application to see how well it detects various issues!
